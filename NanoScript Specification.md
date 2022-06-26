@@ -65,8 +65,8 @@ This language is based very loosely on Python, GDScript, CoffeeScript, Rust, C++
 Here's how the code for a little screen with a player should look like:
 ```coffeescript
 with load('Game.ns')
-  signal on_begin
-  signal on_death
+  on_begin = signal()
+  on_death = signal()
   
   player =
     position: v[0, 0]
