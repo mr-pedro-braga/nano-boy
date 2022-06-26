@@ -12,7 +12,7 @@ So, uh, it's not real. Yet here I am creating a specification for it.
 ```python
 x = 3
 y = 4
-dist = fn a, b -> a + b
+dist = fn a, b : a + b
 
 print dist 3, 4 # Will print out '5'.
 ```
@@ -75,12 +75,12 @@ with load('Game.ns')
     💕: 3
     🛡️: 4
     items: ['Sword', 'Apple', 'Key']
-    update: fn dt:float ->
+    update: fn dt:float :
       position += velocity * dt
 
-  ready = fn -> on_begin()
+  ready = fn : on_begin()
 
-  update = fn dt ->
+  update = fn dt :
     player.update dt
     player.velocity = Input.get_L_joystick_vector()
     if player.💕 <= 0
@@ -122,7 +122,7 @@ You may *force* a variable to be declared/redeclared using `var`.
 
 ```coffeescript
 x = 3
-y = fn ->
+y = fn :
   var x = 4
   print x #Will print 4
 print x #Will print 3
@@ -300,12 +300,12 @@ You can index an object using `.` for string keys, or using `[]` for any other k
 
 ---
 
-***Functions*** are, yes, first-class values and can be created with `fn`, an optional comma-separated list of parameters and `->`.
+***Functions*** are, yes, first-class values and can be created with `fn`, an optional comma-separated list of parameters and `:`.
 > You can also use `λ` instead of `fn` if you're feeling frisky.
 
 ```coffeescript
-add = fn a, b -> a + b
-sub = λ a, b -> a - b
+add = fn a, b : a + b
+sub = λ a, b : a - b
 ```
 
 Note that there's no `return` statement. That's because functions return the value of the last statement in its body.
@@ -314,7 +314,7 @@ Note that there's no `return` statement. That's because functions return the val
 
 You may call a function that has no parameters by using the () operator.
 ```coffeescript
-otherfunc = fn x=3, y=5 -> #Note the default values for the parameters!
+otherfunc = fn x=3, y=5 : #Note the default values for the parameters!
   do_something(x)
   do_something_else(y)
 ```
@@ -331,7 +331,7 @@ y = (add 3, (add 4, 5)) #Clear syntax.
 You can pass parameters by position (like we just did) or by name for better readability.
 
 ```coffeescript
-cook = fn recipe, amount -> [...]
+cook = fn recipe, amount : [...]
 
 cook amount:3, recipe:2
 ```
@@ -340,7 +340,7 @@ cook amount:3, recipe:2
 > For disambiguation you should wrap objects with brackets, which can be unintuitive if you're used to brackets for function calls.
 > 
 > ```coffeescript
-> get_model fn car -> car.model
+> get_model fn car : car.model
 > 
 > print get_model model:Volkswagen, color:'blue', wheels: 4
 > # This would call a function with 3 named parameters, and
@@ -360,7 +360,7 @@ cook amount:3, recipe:2
 In NS, you can create operator-like functions by using `*` as a placeholder
 
 ```coffeescript
-add = fn x, *, y -> x + y
+add = fn x, *, y : x + y
 
 print 3 add 4
 ```
@@ -368,7 +368,7 @@ print 3 add 4
 You can create variable parameter functions (will collect all parameters into a list) with the an ellipsis.
 
 ```coffeescript
-∑ = fn a, others... ->
+∑ = fn a, others... :
   result = a
   for x in others: result += x
   result
@@ -377,32 +377,32 @@ You can create variable parameter functions (will collect all parameters into a 
 Inside a function, the word `self` will refer to the object/class where this function is being called from, similar to JavaScript `this`.
 
 ```coffeescript
-fn x -> 
+fn x :
   self.y = 0
 ```
 
-Functions that, when created, refer to variables inside a local scope copy their values as internal constants, like lambda functions.
+Functions that, when created, refer to variables inside a local scope copy their values as internal constants (lexical closures).
 
 ```coffeescript
-fn -> 
+fn : 
   x = 3
-  f = fn -> print x
+  f = fn : print x
   x = 4
-  f() #Will print 3
+  f() # Will print 3
 ```
 
 This can be used to create functions on the fly like this:
 
 ```coffeescript
-make_adder = fn x ->
-  fn y ->
+make_adder = fn x :
+  fn y :
     x + y
 
 add5 = make_adder 5
 add10 = make_adder 10
 
-add5 10 #Returns 15
-add10 20 #Returns 30
+add5 10 # Returns 15
+add10 20 # Returns 30
 ```
 
 Paralellizable functions that run on the *GPU* can be created by preceding the `fn` keyword with `kernel` and some optional *out* parameters.
@@ -410,7 +410,7 @@ Paralellizable functions that run on the *GPU* can be created by preceding the `
 ```coffeescript
 # A simple shader that fills the output image with a UV,
 # allowing you to pass in the value of the blue channel.
-shader = kernel outcolor:vec3 fn blue -> 
+shader = kernel outcolor:vec3 fn blue : 
   uv : vec2 = KR_GROUP_INDEX / KR_GROUP_SIZE
   outcolor = v[uv.r, uv.g, blue]
 ```
@@ -488,7 +488,7 @@ class Car extends Vehicle
 You can define a static member function by prefixing the function with a '$'.
 
 ```coffeescript
-Car::$create_from_model = fn model -> get_car_from_model model
+Car::$create_from_model = fn model : get_car_from_model model
 
 Car.create_from_model 'Volkswagen 20'
 ```
@@ -503,7 +503,7 @@ x : Car = Car.create_from_model 'Ford 30'
 You can overload operators in classes by using names like `operator+`
 
 ```coffeescript
-VectorPrototype.operator+ = fn right_hand -> v[self.x + right_hand.x, self.y + right_hand.y]
+VectorPrototype.operator+ = fn right_hand : v[self.x + right_hand.x, self.y + right_hand.y]
 ```
 
 ---
@@ -625,10 +625,10 @@ You can use :: to reference of a member of an object or an instance.
 ```coffeescript
 bob = 
   age: 3
-  action: fn -> 'I did an action!!!'
+  action: fn : 'I did an action!!!'
 
 x = bob.age
-bob::action = fn -> 'I changed that action to another action!!!'
+bob::action = fn : 'I changed that action to another action!!!'
 ```
 
 ---
@@ -862,7 +862,7 @@ Remeber this example in the `function` section?
 ```coffeescript
 # A simple shader that fills the output image with a UV,
 # allowing you to pass in the value of the blue channel.
-shader = kernel outcolor:vec3 fn blue -> 
+shader = kernel outcolor:vec3 fn blue : 
   uv : vec2 = KR_GROUP_INDEX / KR_GROUP_SIZE
   outcolor = v[uv.r, uv.g, blue]
 ```
@@ -948,7 +948,7 @@ An algorithm that prints integers... except if they are divisible by 3, 5 or bot
 Here is it in all its glory:
 
 ```coffeescript
-fizzbuzz = fn ->
+fizzbuzz = fn :
   for i in [0..20]
     print_number = yes
     if i mod 3 == 0
@@ -1082,7 +1082,7 @@ Let's look at the code in *NanoScript* and *C++* side-by-side.
 
 #### NanoScript
 ```coffeescript
-fizzbuzz = fn ->
+fizzbuzz = fn :
   for i in [0..20]
     print_number = yes
     if i mod 3 == 0
